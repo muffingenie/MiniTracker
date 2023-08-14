@@ -6,8 +6,6 @@ import time
 import csv
 import smtplib
 
-
-
 #shodan connexion
 
 SHODAN_API_KEY = "YOUR_KEY"
@@ -60,23 +58,7 @@ CREATE TABLE IF NOT EXISTS MOA(
 conn.commit()
 
 #querying shodan
-/*
-
-add here a loop for each heuristic according to this format: 
-
-        For x in heuristics:
-
-            results = api.search(x)
-            for result in results['matches']:
-        
-            heuristics_results = (result['ip_str'])
-            heuristics_port = (result['port'])
-        
-                    
-            c.execute('INSERT INTO MOA VALUES (?,?,?,?,?,?)',(('heuristics'),(heuristics_results),(heuristics_port),(collecting_date),('TLP:TBD'),('heuristics')))
-
-
-*/
+#add and adapt the next for loops for all your heuristics
 
 try:
 
@@ -93,9 +75,7 @@ try:
         
                     
             c.execute('INSERT INTO MOA VALUES (?,?,?,?,?,?)',(('DcRat'),(dcrat_results),(dcrat_port),(collecting_date),('TLP:CLEAR'),('DcRat')))
-
-
-                         
+                  
 
     conn.commit()
 
