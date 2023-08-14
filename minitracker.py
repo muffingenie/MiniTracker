@@ -15,7 +15,9 @@ SHODAN_API_KEY = "YOUR_KEY"
 api = shodan.Shodan(SHODAN_API_KEY)
 collecting_date = datetime.datetime.now()
 
-#setting up the heuristics
+#setting up the heuristics 
+#ADD here the heuristics you want to check on Shodan, here is an example:
+
 heuristics_dcrat = {
     'ssl:"DcRat Server"',
 
@@ -58,6 +60,23 @@ CREATE TABLE IF NOT EXISTS MOA(
 conn.commit()
 
 #querying shodan
+/*
+
+add here a loop for each heuristic according to this format: 
+
+        For x in heuristics:
+
+            results = api.search(x)
+            for result in results['matches']:
+        
+            heuristics_results = (result['ip_str'])
+            heuristics_port = (result['port'])
+        
+                    
+            c.execute('INSERT INTO MOA VALUES (?,?,?,?,?,?)',(('heuristics'),(heuristics_results),(heuristics_port),(collecting_date),('TLP:TBD'),('heuristics')))
+
+
+*/
 
 try:
 
