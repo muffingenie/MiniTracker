@@ -16,7 +16,7 @@ collecting_date = datetime.datetime.now()
 
 heuristic = {"DcRAT certificate":"ssl:'DcRat Server'","Cobalt Strike":"'cobalt strike'"}
 
-#shodan search
+#shodan search function
 
 def shodan_search():
     for key, signature in heuristic.items():
@@ -30,7 +30,7 @@ def shodan_search():
             database_management(key, signature_results, signature_port)
 
 
-#database management
+#database management function
 def database_management(key, signature_results, signature_port):
 
     conn = sqlite3.connect('tracker.db')
