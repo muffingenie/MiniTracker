@@ -1,14 +1,11 @@
 import sqlite3
 import shodan  
-from requests import Session
 import datetime
-import time
-import csv
-import smtplib
+
 
 #shodan connexion
 
-SHODAN_API_KEY = "YOUR_KEY"
+SHODAN_API_KEY = "YOUR_VERY_OWN_KEY"
 
 api = shodan.Shodan(SHODAN_API_KEY)
 collecting_date = datetime.datetime.now()
@@ -16,11 +13,45 @@ collecting_date = datetime.datetime.now()
 #setting up the heuristics 
 #ADD here the heuristics you want to check on Shodan, here is an example:
 
-heuristics_dcrat = {
-    'ssl:"DcRat Server"',
 
-    
-}
+heuristic = {"DcRAT certificate":"ssl:'DcRat Server'","Cobalt Strike":"'cobalt strike'"}
+
+#shodan search
+
+def shodan_search():
+    for key, signature in heuristic.items():
+        results = api.search(signature)
+        for result in results['matches']:
+
+            signature_results = (result['ip_str'])
+            signature_port = (result['port'])
+            #print(f"{key}: {signature_results}")
+            
+            database_management(key, signature_results, signature_port)
+
+
+#database management
+def database_management(key, signature_results, signature_port):
+
+    conn = sqlite3.connect('tracker.db')
+
+    c = conn.cursor()
+
+    c.execute("""
+
+    CREATE TABLE IF NOT EXISTS MOA(
+        Description TEXT, 
+        ip TEXT,
+        port TEXT,
+        date TEXT 
+    )
+    """)
+
+    c.execute("INSERT INTO MOA (Description, ip, port, date) VALUES (?, ?, ?, ?)",
+              (key, signature_results, signature_port, str(collecting_date)))
+
+    conn.commit()
+    conn.close()
 
 
 print("""
@@ -34,64 +65,6 @@ print("""
 
 print('[+] Hunting in progress...\n')
 
+shodan_search()
 
-#database management
-
-conn = sqlite3.connect('tracker.db')
-
-c = conn.cursor()
-
-c.execute("""
-
-CREATE TABLE IF NOT EXISTS MOA(
-    Description TEXT, 
-    ip TEXT,
-    port TEXT,
-    date TEXT,
-    tlp TEXT,
-    label TEXT
-      
-   
-)
-""")
-
-conn.commit()
-
-#querying shodan
-#add and adapt the next for loops for all your heuristics
-
-try:
-
-    for x in heuristics_dcrat:
-
-        results = api.search(x)
-
-        # Show the results
-        
-        for result in results['matches']:
-        
-            dcrat_results = (result['ip_str'])
-            dcrat_port = (result['port'])
-        
-                    
-            c.execute('INSERT INTO MOA VALUES (?,?,?,?,?,?)',(('DcRat'),(dcrat_results),(dcrat_port),(collecting_date),('TLP:CLEAR'),('DcRat')))
-                  
-
-    conn.commit()
-
-    print("[+] querying services and saving results in database")
-    print("[+] Hunting done!")
-
-    print('[+] Creating CSV for export')
-
- #Exporting data in a CSV
-
-    c.execute("select * from MOA;")
-    with open("moa_tracker.csv", 'w',newline='') as csv_file: 
-        csv_writer = csv.writer(csv_file)
-        csv_writer.writerow([i[0] for i in c.description]) 
-        csv_writer.writerows(c)
-    conn.close()
-    
-    print('[+] CSV created')
-
+print('[+] Hunting done.\n')
